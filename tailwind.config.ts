@@ -15,7 +15,9 @@ module.exports = {
       'gray-light': '#d3dce6',
     },
     fontFamily: {
-      sans: ['Graphik', 'sans-serif'],
+      sans: ['var(--font-geist-sans)'],
+      mono: ['var(--font-geist-mono)'],
+      'open-sans': ['var(--font-open-sans)'],
       serif: ['Merriweather', 'serif'],
     },
     extend: {

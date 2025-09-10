@@ -8,7 +8,7 @@ function page() {
       <div className='grid-cols-1'>
         <Sidebar /> 
       </div>
-      <div className='grid-cols-2'>
+      <div className='w-full col-span-2'>
         <Login />
       </div>
     </div>

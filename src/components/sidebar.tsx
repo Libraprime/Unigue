@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 const featuresData = [
   {
@@ -24,24 +25,35 @@ const featuresData = [
 
 function Sidebar() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFading, setIsFading] = useState(false);
 
   useEffect(() => {
-    // Set a timer to change the featured item every 60 seconds (60000 milliseconds)
+    // Start the fade-out process after 4.5 seconds
     const timer = setTimeout(() => {
-      // Increment the index, and loop back to the start if we reach the end of the array
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % featuresData.length);
-    }, 5000);
+      setIsFading(true);
+    }, 4500);
 
-    // Clear the timer when the component unmounts or the effect re-runs
     return () => clearTimeout(timer);
-  }, [currentIndex]); // The effect re-runs whenever the current index changes
+  }, [currentIndex]);
+
+  useEffect(() => {
+    if (isFading) {
+      // After a short delay to allow for the fade-out transition, change the item
+      const transitionTimer = setTimeout(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % featuresData.length);
+        setIsFading(false); // Reset the fading state to allow the new item to fade in
+      }, 500); // Matches the CSS transition duration
+
+      return () => clearTimeout(transitionTimer);
+    }
+  }, [isFading]);
 
   const currentFeature = featuresData[currentIndex];
 
   return (
     <aside data-theme="luxury" className='bg-base grid-cols-1 h-screen'>
       <div className='flex items-center flex-col pt-32'>
-        <img
+        <Image
           src='/logo.png'
           alt='Unique Logo'
           width={150}
@@ -51,8 +63,8 @@ function Sidebar() {
         <p className=''>Unique</p>
       </div>
       
-      <div className='text-center flex flex-col items-center mt-16'>
-        <img
+      <div className={`text-center flex flex-col items-center mt-16 transition-opacity duration-500 ${isFading ? 'opacity-0' : 'opacity-100'}`}>
+        <Image
           src={currentFeature.imageSrc}
           alt={currentFeature.alt}
           width={50}
@@ -60,6 +72,18 @@ function Sidebar() {
         />
         <p className='mt-5'>{currentFeature.title}</p>
         <p className='px-10'>{currentFeature.description}</p>
+      </div>
+
+      {/* Horizontal rule indicators */}
+      <div className="flex justify-center mt-4 space-x-2">
+        {featuresData.map((_, index) => (
+          <div
+            key={index}
+            className={`h-1 w-8 rounded-full transition-all duration-500 ${
+              index === currentIndex ? 'bg-amber-500' : 'bg-[#553900]'
+            }`}
+          ></div>
+        ))}
       </div>
     </aside> 
   )

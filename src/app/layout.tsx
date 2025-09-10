@@ -1,9 +1,9 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import FirebaseProvider from "../components/FirebaseProvider"; // Import the provider
+import FirebaseProvider from "../components/FirebaseProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,6 +13,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Initialize the Open Sans font
+const openSans = Open_Sans({
+  subsets: ["latin"],
+  display: "swap", // This helps with font loading
+  variable: "--font-open-sans", // Add a CSS variable
 });
 
 export const metadata: Metadata = {
@@ -28,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${openSans.variable} antialiased`}
       >
         <Toaster position="top-left"/>
         <FirebaseProvider>

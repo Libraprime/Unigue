@@ -1,4 +1,3 @@
-// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -19,6 +18,12 @@ const nextConfig = {
       },
     ],
   },
+  // The allowedDevOrigins property must be inside the main config object
+  allowedDevOrigins: [
+    'local-origin.dev',
+    '*.local-origin.dev',
+    'http://10.137.0.62:3000' // Make sure to include the protocol and port if your request is coming from there
+  ],
 };
 
 export default nextConfig;
