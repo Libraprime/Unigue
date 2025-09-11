@@ -1,10 +1,9 @@
-// firebase.js
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore"; // Adding Firestore as a common example
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getAnalytics } from 'firebase/analytics';
 
 // Your web app's Firebase configuration using environment variables
-// IMPORTANT: These variables must be prefixed with `NEXT_PUBLIC_` to be used on the client-side
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,16 +11,25 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase services
-const analytics = getAnalytics(app);
-const db = getFirestore(app); // Initializing Firestore
+// Initialize Firebase services conditionally on the client-side
+let analytics;
+let db;
+let auth;
 
-// Export the initialized services so you can use them throughout your app
-export { app, analytics, db };
+if (typeof window !== 'undefined') {
+  analytics = getAnalytics(app);
+  db = getFirestore(app);
+  auth = getAuth(app);
+} else {
+  // On the server, we only need auth
+  auth = getAuth(app);
+}
 
+// Export the initialized services
+export { app, analytics, db, auth };
