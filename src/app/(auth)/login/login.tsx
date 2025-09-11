@@ -1,10 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { app } from '../../../../lib/firebase';
-
-// Get the auth instance using the initialized app
-const auth = getAuth(app);
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useFirebase } from '../../../components/FirebaseProvider';
+import Link from 'next/link';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,23 +10,32 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Use the custom hook to access the Firebase services
+  const { auth, loading: firebaseLoading } = useFirebase();
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!auth) {
+      console.error("Auth service is not available.");
+      setError("An unexpected error occurred. Please try again later.");
+      setLoading(false);
+      return;
+    }
     
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Login successful, you can redirect the user or update UI here
       console.log('Login successful!');
     } catch (err: any) {
+      // Log the full error object for debugging purposes
+      console.error(err);
+
       // Handle different Firebase authentication errors
       let errorMessage = 'An unexpected error occurred.';
-      if (err.code === 'auth/invalid-email') {
-        errorMessage = 'The email address is not valid.';
-      } else if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        errorMessage = 'Invalid email or password.';
-      } else if (err.code === 'auth/invalid-credential') {
+      if (err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         errorMessage = 'Invalid email or password.';
       }
 
@@ -38,8 +45,19 @@ export default function Login() {
     }
   };
 
+  if (firebaseLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
+
+
+  
+
   return (
-    <div className='h-screen text-black flex flex-col mx-5 md:mx-52 items-start'>
+    <div className='h-screen font-sans text-black flex flex-col mx-5 md:mx-52 items-start'>
       <h1 className='text-center font-bold text-3xl mt-5 md:mt-32 uppercase'>Welcome to unique stores</h1>
       <p className='pt-10'>Log into your account</p>
 
@@ -94,18 +112,20 @@ export default function Login() {
           />
         </label>
 
-        <a href='/forgot-password' className='py-5 ml-48'>
-          Forgot password?
-        </a>
+        <div className='py-5 ml-48'>
+          <Link href='/forgot-password'>
+            Forgot password?
+          </Link>
+        </div>
         
         {error && <p className='text-red-500'>{error}</p>}
         
-        <button className='btn btn-primary w-48' type='submit' disabled={loading}>
+        <button className='btn btn-base w-48' type='submit' disabled={loading}>
           {loading ? 'Logging In...' : 'LOGIN'}
         </button>
 
         <p className='py-5'>
-          Don't have an account? <a href='/signUp' className='font-semibold'>Register</a>
+          Don't have an account? <Link href='/signUp' className='font-semibold'>Register</Link>
         </p>
       </form>
     </div>
