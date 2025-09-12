@@ -1,5 +1,5 @@
 import React from 'react'
-import  Register  from './Register'
+import  Register  from './register'
 import Sidebar from '@/components/sidebar'
 
 function page() {

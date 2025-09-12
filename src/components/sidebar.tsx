@@ -51,7 +51,7 @@ function Sidebar() {
   const currentFeature = featuresData[currentIndex];
 
   return (
-    <aside data-theme="luxury" className='bg-base grid-cols-1 h-screen'>
+    <aside data-theme="luxury" className='bg-base font-serif grid-cols-1 h-screen'>
       <div className='flex items-center flex-col pt-32'>
         <Image
           src='/logo.png'

@@ -60,8 +60,8 @@ export default function Login() {
   
 
   return (
-    <div className='h-screen font-sans text-black flex flex-col mx-5 md:mx-52 items-start'>
-      <h1 className='text-center font-bold text-3xl mt-5 md:mt-32 uppercase'>Welcome to unique stores</h1>
+    <div className='h-screen font-serif text-black flex flex-col mx-5 md:mx-52 items-start'>
+      <h1 className='font-bold text-3xl mt-5 md:mt-32 uppercase'>Welcome to unique stores</h1>
       <p className='pt-10'>Log into your account</p>
 
       <form onSubmit={handleLogin} className='w-full'>
