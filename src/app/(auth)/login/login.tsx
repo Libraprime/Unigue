@@ -3,12 +3,15 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useFirebase } from '../../../components/FirebaseProvider';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const route = useRouter();
 
   // Use the custom hook to access the Firebase services
   const { auth, loading: firebaseLoading } = useFirebase();
@@ -27,7 +30,7 @@ export default function Login() {
     
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Login successful, you can redirect the user or update UI here
+      route.push('/');
       console.log('Login successful!');
     } catch (err: any) {
       // Log the full error object for debugging purposes

@@ -1,26 +1,38 @@
-// components/FirebaseProvider.tsx
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { initializeApp, type FirebaseApp } from "firebase/app";
-import { getAnalytics, type Analytics } from "firebase/analytics";
-import { getFirestore, type Firestore } from "firebase/firestore";
-import { getAuth, type Auth, onAuthStateChanged, type User } from "firebase/auth";
+// Import types for the Firebase services.
+import { type FirebaseApp } from "firebase/app";
+import { type Analytics } from "firebase/analytics";
+import { type Firestore } from "firebase/firestore";
+import { type Auth, onAuthStateChanged, type User, signInWithCustomToken, signInAnonymously } from "firebase/auth";
 
-// Define the type for our Firebase services object
+// ✅ Import initialized Firebase services from your lib
+import { app, analytics, db, auth } from "../../lib/firebase";
+
+// Declare global variables provided by the Canvas environment.
+declare var __initial_auth_token: string | undefined;
+
+// Define the type for our Firebase services object, including the possibility of null or undefined.
 interface FirebaseServices {
-  app: FirebaseApp;
-  analytics: Analytics;
-  auth: Auth;
-  db: Firestore;
+  app: FirebaseApp | null;
+  analytics: Analytics | undefined;
+  auth: Auth | undefined;
+  db: Firestore | undefined;
   currentUser: User | null;
   loading: boolean;
 }
 
-// Create a context to hold the Firebase services, typed to our interface
-const FirebaseContext = createContext<FirebaseServices | null>(null);
+// Create the context with a default value that matches the interface.
+const FirebaseContext = createContext<FirebaseServices>({
+  app,
+  analytics: undefined,
+  auth: undefined,
+  db: undefined,
+  currentUser: null,
+  loading: true,
+});
 
-// Custom hook to use the Firebase services in any component
 export const useFirebase = () => {
   const context = useContext(FirebaseContext);
   if (context === null) {
@@ -29,52 +41,66 @@ export const useFirebase = () => {
   return context;
 };
 
-// The Firebase Provider component that will initialize the app and provide services
 export default function FirebaseProvider({ children }: { children: ReactNode }) {
-  const [firebaseServices, setFirebaseServices] = useState<Omit<FirebaseServices, "currentUser" | "loading"> | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Effect to initialize Firebase services
+  // This effect handles the initial authentication.
   useEffect(() => {
-    if (!firebaseServices) {
-      try {
-        const firebaseConfig = {
-          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-          messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-          appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-          measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        setFirebaseServices({ app, analytics, auth, db });
-      } catch (error) {
-        console.error("Firebase initialization failed:", error);
+    const authUser = async () => {
+      if (auth) {
+        try {
+          if (typeof __initial_auth_token !== 'undefined') {
+            console.log("Signing in with custom token.");
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            console.log("Signing in anonymously.");
+            await signInAnonymously(auth);
+          }
+        } catch (error) {
+          console.error("Authentication failed:", error);
+        }
       }
-    }
-  }, [firebaseServices]);
+    };
+    authUser();
+  }, []);
 
-  // Effect to handle authentication state changes
+  // This effect listens for auth state changes.
   useEffect(() => {
-    if (firebaseServices?.auth) {
-      const unsubscribe = onAuthStateChanged(firebaseServices.auth, (user) => {
+    if (auth) {
+      console.log("Setting up auth state listener...");
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        console.log("Auth state changed. Current user:", user);
         setCurrentUser(user);
         setLoading(false);
       });
 
-      return () => unsubscribe();
+      return () => {
+        console.log("Cleaning up auth state listener.");
+        unsubscribe();
+      };
+    } else {
+      console.error("Firebase Auth service is not available.");
+      setLoading(false);
     }
-  }, [firebaseServices?.auth]);
+  }, []);
 
-  // Provide the services and user state to the rest of the app via context
-  const contextValue = firebaseServices ? { ...firebaseServices, currentUser, loading } : null;
+  const contextValue: FirebaseServices = {
+    app,
+    analytics,
+    auth,
+    db,
+    currentUser,
+    loading,
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <FirebaseContext.Provider value={contextValue}>
