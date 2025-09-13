@@ -190,7 +190,7 @@ export default function Register() {
         {error && <p className='text-red-500'>{error}</p>}
         
         <button className='btn btn-base w-48' type='submit' disabled={loading}>
-          {loading ? 'Registering...' : 'REGISTER'}
+          {loading ? 'Creating...' : 'CREATE'}
         </button>
 
         <p className='pt-5'>
