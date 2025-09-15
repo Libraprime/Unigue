@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useFirebase } from '../../../components/FirebaseProvider';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Oauth from '../Oauth';
 
 
 export default function Register() {
@@ -189,10 +190,14 @@ export default function Register() {
         
         {error && <p className='text-red-500'>{error}</p>}
         
-        <button className='btn btn-base w-48' type='submit' disabled={loading}>
-          {loading ? 'Creating...' : 'CREATE'}
-        </button>
+        <div className='flex gap-36 align-middle'>
+          <button className='btn btn-base' type='submit' disabled={loading}>
+            {loading ? 'Creating...' : 'CREATE'}
+          </button>
 
+          <Oauth />
+        </div>
+        
         <p className='pt-5'>
           Already have an account? <Link href='/login' className='font-semibold'>Login</Link>
         </p>

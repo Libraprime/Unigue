@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useFirebase } from '../../../components/FirebaseProvider';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Oauth from '../Oauth';
 
 
 export default function Login() {
@@ -60,7 +61,7 @@ export default function Login() {
   
 
   return (
-    <div className='h-screen font-serif text-black flex flex-col mx-5 md:mx-52 items-start'>
+    <div className='h-screen font-serif text-black flex flex-col mx-5 md:ml-52 items-start'>
       <h1 className='font-bold text-3xl mt-5 md:mt-32 uppercase'>Welcome to unique stores</h1>
       <p className='pt-10'>Log into your account</p>
 
@@ -123,10 +124,14 @@ export default function Login() {
         
         {error && <p className='text-red-500'>{error}</p>}
         
-        <button className='btn btn-base w-48' type='submit' disabled={loading}>
-          {loading ? 'Logging In...' : 'LOGIN'}
-        </button>
+        <div className='flex gap-36'>
+          <button className='btn btn-base' type='submit' disabled={loading}>
+            {loading ? 'Logging In...' : 'LOGIN'}
+          </button>
 
+          <Oauth />
+        </div>
+  
         <p className='py-5'>
           Don't have an account? <Link href='/signUp' className='font-semibold'>Register</Link>
         </p>
