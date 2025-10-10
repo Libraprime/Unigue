@@ -27,9 +27,15 @@ export default function ForgotPassword() {
     try {
       await sendPasswordResetEmail(auth, email);
       setSuccess("Password reset email sent! Please check your inbox.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      if (err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found') {
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'code' in err &&
+        typeof (err as { code?: unknown }).code === 'string' &&
+        ((err as { code: string }).code === 'auth/invalid-email' || (err as { code: string }).code === 'auth/user-not-found')
+      ) {
         setError("Invalid email address.");
       } else {
         setError("Failed to send reset email. Please try again.");

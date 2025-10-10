@@ -33,13 +33,24 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, email, password);
       route.push('/');
       console.log('Login successful!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Log the full error object for debugging purposes
       console.error(err);
 
       // Handle different Firebase authentication errors
       let errorMessage = 'An unexpected error occurred.';
-      if (err.code === 'auth/invalid-email' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'code' in err &&
+        typeof (err as { code?: unknown }).code === 'string' &&
+        (
+          (err as { code: string }).code === 'auth/invalid-email' ||
+          (err as { code: string }).code === 'auth/user-not-found' ||
+          (err as { code: string }).code === 'auth/wrong-password' ||
+          (err as { code: string }).code === 'auth/invalid-credential'
+        )
+      ) {
         errorMessage = 'Invalid email or password.';
       }
 

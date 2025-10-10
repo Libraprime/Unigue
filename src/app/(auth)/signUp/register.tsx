@@ -48,17 +48,20 @@ export default function Register() {
       }
       router.push('/');
       console.log('Registration successful!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
 
       // Handle different Firebase authentication errors
       let errorMessage = 'An unexpected error occurred.';
-      if (err.code === 'auth/invalid-email') {
-        errorMessage = 'The email address is not valid.';
-      } else if (err.code === 'auth/weak-password') {
-        errorMessage = 'Password should be at least 6 characters.';
-      } else if (err.code === 'auth/email-already-in-use') {
-        errorMessage = 'This email address is already in use.';
+      if (typeof err === 'object' && err !== null && 'code' in err) {
+        const code = (err as { code: string }).code;
+        if (code === 'auth/invalid-email') {
+          errorMessage = 'The email address is not valid.';
+        } else if (code === 'auth/weak-password') {
+          errorMessage = 'Password should be at least 6 characters.';
+        } else if (code === 'auth/email-already-in-use') {
+          errorMessage = 'This email address is already in use.';
+        }
       }
 
       setError(errorMessage);
@@ -76,12 +79,12 @@ export default function Register() {
   }
 
   return (
-    <div className='h-screen font-serif text-black flex flex-col mx-5 md:mx-52 items-start'>
+    <div className='font-serif text-black flex flex-col mx-5 md:mx-52 items-start'>
       <h1 className='text-center font-bold text-3xl mt-5 uppercase'>Register Account</h1>
-      <p className='pt-10'>Let's create your account</p>
+      <p className='pt-7'>Let's create your account</p>
 
       <form onSubmit={handleRegister} className='w-full'>
-        <p className='pt-10 pb-2'>Full Name</p>
+        <p className='pt-7 pb-2'>Full Name</p>
         <label htmlFor='name' className='input validator bg-amber-50'>
           <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
             <g
