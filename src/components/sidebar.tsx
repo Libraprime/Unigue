@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 const featuresData = [
@@ -56,6 +56,7 @@ function Sidebar() {
         <Image
           src='/logo.png'
           alt='Unique Logo'
+          unoptimized
           width={150}
           height={40}
         />

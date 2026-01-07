@@ -173,7 +173,7 @@ export default function Register() {
         </label>
 
         {/* T&C CHECKBOX */}
-        <div className='py-6 items-start gap-2'>
+        <div className='py-5 items-start gap-2'>
           <input 
             type="checkbox" 
             id="terms"
