@@ -11,7 +11,7 @@ import { type Auth, onAuthStateChanged, type User, signInWithCustomToken, signIn
 import { app, analytics, db, auth } from "../../lib/firebase";
 
 // Declare global variables provided by the Canvas environment.
-declare var __initial_auth_token: string | undefined;
+declare let __initial_auth_token: string | undefined;
 
 // Define the type for our Firebase services object, including the possibility of null or undefined.
 interface FirebaseServices {

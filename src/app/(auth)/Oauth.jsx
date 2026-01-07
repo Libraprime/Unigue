@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { auth, db } from '../../../lib/firebase'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
-import Router from 'next/router'
 import { useRouter } from 'next/navigation'
 
 export default function Oauth() {

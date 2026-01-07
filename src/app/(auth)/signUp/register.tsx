@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Oauth from '../Oauth';
 
-
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,9 +13,9 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  
   const router = useRouter();
-
-  // Use the custom hook to access the Firebase services
   const { auth, loading: firebaseLoading } = useFirebase();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -24,7 +23,12 @@ export default function Register() {
     setLoading(true);
     setError(null);
 
-    // Basic password validation
+    if (!agreed) {
+      setError("You must agree to the Terms and Conditions.");
+      setLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       setLoading(false);
@@ -32,26 +36,26 @@ export default function Register() {
     }
 
     if (!auth) {
-      console.error("Auth service is not available.");
       setError("An unexpected error occurred. Please try again later.");
       setLoading(false);
       return;
     }
-    
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Create user
+      await createUserWithEmailAndPassword(auth, email, password);
+
       // Update the user's profile with the provided name
       if (auth.currentUser && name) {
         await updateProfile(auth.currentUser, {
           displayName: name
         });
       }
-      router.push('/');
+
       console.log('Registration successful!');
+      router.push('/login');
     } catch (err: unknown) {
       console.error(err);
-
-      // Handle different Firebase authentication errors
       let errorMessage = 'An unexpected error occurred.';
       if (typeof err === 'object' && err !== null && 'code' in err) {
         const code = (err as { code: string }).code;
@@ -63,7 +67,6 @@ export default function Register() {
           errorMessage = 'This email address is already in use.';
         }
       }
-
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -73,34 +76,31 @@ export default function Register() {
   if (firebaseLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-gray-500 animate-pulse">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className='font-serif text-black flex flex-col mx-5 md:mx-52 items-start'>
+    <div className='font-serif text-black flex flex-col mx-5 items-center'>
       <h1 className='text-center font-bold text-3xl mt-5 uppercase'>Register Account</h1>
-      <p className='pt-7'>Let's create your account</p>
+      <p className='pt-7'>Let&apos;s create your account</p>
 
-      <form onSubmit={handleRegister} className='w-full'>
-        <p className='pt-7 pb-2'>Full Name</p>
+      <form onSubmit={handleRegister}>
+        {/* FULL NAME */}
+        <p className='pt-6 pb-2'>Full Name</p>
         <label htmlFor='name' className='input validator bg-amber-50'>
-          <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-            <g
-              strokeLinejoin='round'
-              strokeLinecap='round'
-              strokeWidth='2.5'
-              fill='none'
-              stroke='currentColor'
-            >
-              <rect width='20' height='16' x='2' y='4' rx='2'></rect>
-              <path d='m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'></path>
+          {/* Corrected to User Icon */}
+          <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
             </g>
           </svg>
           <input
             type='text'
             name='name'
+            required
             placeholder='Full Name'
             id='name'
             className='bg-amber-50'
@@ -109,16 +109,11 @@ export default function Register() {
           />
         </label>
 
+        {/* EMAIL */}
         <p className='pt-6 pb-2'>Email</p>
         <label htmlFor='email' className='input validator bg-amber-50'>
           <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-            <g
-              strokeLinejoin='round'
-              strokeLinecap='round'
-              strokeWidth='2.5'
-              fill='none'
-              stroke='currentColor'
-            >
+            <g strokeLinejoin='round' strokeLinecap='round' strokeWidth='2.5' fill='none' stroke='currentColor'>
               <rect width='20' height='16' x='2' y='4' rx='2'></rect>
               <path d='m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'></path>
             </g>
@@ -126,6 +121,7 @@ export default function Register() {
           <input
             type='email'
             name='email'
+            required
             placeholder='account@email.com'
             id='email'
             className='bg-amber-50'
@@ -134,16 +130,11 @@ export default function Register() {
           />
         </label>
 
+        {/* PASSWORD */}
         <p className='pt-6 pb-2'>Password</p>
         <label className='input validator bg-amber-50' htmlFor='password'>
           <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-            <g
-              strokeLinejoin='round'
-              strokeLinecap='round'
-              strokeWidth='2.5'
-              fill='none'
-              stroke='currentColor'
-            >
+            <g strokeLinejoin='round' strokeLinecap='round' strokeWidth='2.5' fill='none' stroke='currentColor'>
               <path d='M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z'></path>
               <circle cx='16.5' cy='7.5' r='.5' fill='currentColor'></circle>
             </g>
@@ -160,16 +151,11 @@ export default function Register() {
           />
         </label>
 
-        <p className='pt-6 pb-3'>Confirm Password</p>
+        {/* CONFIRM PASSWORD */}
+        <p className='pt-6 pb-2'>Confirm Password</p>
         <label className='input validator bg-amber-50' htmlFor='confirm-password'>
           <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-            <g
-              strokeLinejoin='round'
-              strokeLinecap='round'
-              strokeWidth='2.5'
-              fill='none'
-              stroke='currentColor'
-            >
+            <g strokeLinejoin='round' strokeLinecap='round' strokeWidth='2.5' fill='none' stroke='currentColor'>
               <path d='M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z'></path>
               <circle cx='16.5' cy='7.5' r='.5' fill='currentColor'></circle>
             </g>
@@ -186,23 +172,33 @@ export default function Register() {
           />
         </label>
 
-       <p className='py-2'>
-        <input type="checkbox" name="" id="" />
-        By creating your account, you agree with our <Link className='font-semibold' href='/Info/termsConditions'>Terms and Conditions</Link> & <Link className='font-semibold' href='/Info/privacy_policy'>Privacy Policy</Link>
-       </p>
+        {/* T&C CHECKBOX */}
+        <div className='py-6 items-start gap-2'>
+          <input 
+            type="checkbox" 
+            id="terms"
+            className="checkbox validator mr-1 border-2  border-black" 
+            checked={agreed} 
+            onChange={(e) => setAgreed(e.target.checked)} 
+          />
+          <label htmlFor="terms" className="text-sm">
+            By creating your account, you agree with our{' '}
+            <Link className='font-semibold underline' href='/Info/termsConditions'>Terms and Conditions</Link> &{' '}
+            <Link className='font-semibold underline' href='/Info/privacy_policy'>Privacy Policy</Link>
+          </label>
+        </div>
         
-        {error && <p className='text-red-500'>{error}</p>}
+        {error && <p className='text-red-500 text-sm mb-4'>{error}</p>}
         
-        <div className='flex gap-36 align-middle'>
-          <button className='btn btn-base' type='submit' disabled={loading}>
-            {loading ? 'Creating...' : 'CREATE'}
+        <div className='flex flex-wrap gap-4 items-center'>
+          <button className='btn btn-primary px-8' type='submit' disabled={loading}>
+            {loading ? 'CREATING...' : 'CREATE'}
           </button>
-
           <Oauth />
         </div>
         
         <p className='pt-5'>
-          Already have an account? <Link href='/login' className='font-semibold'>Login</Link>
+          Already have an account? <Link href='/login' className='font-semibold text-blue-600 hover:underline'>Login</Link>
         </p>
       </form>
     </div>

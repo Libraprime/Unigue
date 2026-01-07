@@ -30,8 +30,10 @@ export default function Login() {
     }
     
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      route.push('/');
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log("Signed in as:", user.displayName);
+      route.push('/dashboard');
       console.log('Login successful!');
     } catch (err: unknown) {
       // Log the full error object for debugging purposes
@@ -144,7 +146,7 @@ export default function Login() {
         </div>
   
         <p className='py-5'>
-          Don't have an account? <Link href='/signUp' className='font-semibold'>Register</Link>
+          Don&apos;t have an account? <Link href='/signUp' className='font-semibold'>Register</Link>
         </p>
       </form>
     </div>
