@@ -56,7 +56,6 @@ function Sidebar() {
         <Image
           src='/logo.png'
           alt='Unique Logo'
-          unoptimized
           width={150}
           height={40}
         />
