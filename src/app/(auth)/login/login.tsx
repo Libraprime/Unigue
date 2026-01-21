@@ -142,7 +142,8 @@ export default function Login() {
             {loading ? 'Logging In...' : 'LOGIN'}
           </button>
 
-          <Oauth />
+          
+            <Oauth />
         </div>
   
         <p className='py-5'>

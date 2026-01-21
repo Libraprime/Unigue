@@ -46,7 +46,7 @@ export default function Oauth() {
       <button
         type="button"
         onClick={onGoogleClick}
-        className="p-2 border rounded"
+        className="p-2 border rounded cursor-pointer hover:shadow-md transition-shadow flex items-center"
       >
         <Image 
           src="/google.png"
