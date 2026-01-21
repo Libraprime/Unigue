@@ -4,7 +4,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useFirebase } from '../../../components/FirebaseProvider';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Oauth from '../Oauth';
+import Oauth from '@/components/Oauth';
 
 
 export default function Login() {

@@ -4,7 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 // import { usePathname } from 'next/navigation'
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { auth, db } from '../../../lib/firebase'
+import { auth, db } from './lib/firebase'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 

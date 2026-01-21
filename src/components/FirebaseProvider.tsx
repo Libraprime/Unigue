@@ -8,7 +8,7 @@ import { type Firestore } from "firebase/firestore";
 import { type Auth, onAuthStateChanged, type User, signInWithCustomToken, signInAnonymously } from "firebase/auth";
 
 // ✅ Import initialized Firebase services from your lib
-import { app, analytics, db, auth } from "../../lib/firebase";
+import { app, analytics, db, auth } from "./lib/firebase";
 
 // Declare global variables provided by the Canvas environment.
 declare let __initial_auth_token: string | undefined;
