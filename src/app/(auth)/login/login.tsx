@@ -65,7 +65,7 @@ export default function Login() {
   if (firebaseLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Loading...</p>
+        <span className="loading loading-spinner text-warning"></span>
       </div>
     );
   }
@@ -74,7 +74,7 @@ export default function Login() {
   
 
   return (
-    <div className='h-screen font-serif text-black flex flex-col mx-5 md:ml-52 items-start'>
+    <div className='h-screen font-serif flex flex-col mx-5 md:ml-52 items-start'>
       <h1 className='font-bold text-3xl mt-5 md:mt-32 uppercase'>Welcome to unique stores</h1>
       <p className='pt-10'>Log into your account</p>
 

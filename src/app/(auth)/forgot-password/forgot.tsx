@@ -48,19 +48,19 @@ export default function ForgotPassword() {
   if (firebaseLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Loading...</p>
+        <span className="loading loading-spinner text-warning"></span>
       </div>
     );
   }
 
   return (
-    <div className='h-screen font-serif text-black flex flex-col mx-5 md:mx-52 items-start'>
+    <div className='h-screen font-serif flex flex-col mx-5 md:mx-52 items-start'>
       <h1 className='font-bold text-3xl mt-5 md:mt-32 uppercase'>Forgot password</h1>
       <p className='pt-10'>We will send a new password reset link to your email</p>
 
       <form onSubmit={handleSubmit} className='w-full'>
         <p className='pt-10 pb-3'>Email</p>
-        <label htmlFor='email' className='input validator bg-amber-50'>
+        <label htmlFor='email' className='input validator'>
           <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
             <g strokeLinejoin='round' strokeLinecap='round' strokeWidth='2.5' fill='none' stroke='currentColor'>
               <rect width='20' height='16' x='2' y='4' rx='2'></rect>
@@ -81,12 +81,13 @@ export default function ForgotPassword() {
         {error && <p className="text-red-500 mt-2">{error}</p>}
         {success && <p className="text-green-600 mt-2">{success}</p>}
 
-        <button className='btn btn-base w-48 my-5' type='submit' disabled={loading}>
+        <button className='btn block btn-base w-48 my-5' type='submit' disabled={loading}>
           {loading ? 'Submitting...' : 'SUBMIT'}
         </button>
       </form>
 
-      <Link href="/login" className="text-blue-500 mt-2">
+      <Link href="/login" className="text-amber-500 mt-2">
+
         Back to login
       </Link>
     </div>
