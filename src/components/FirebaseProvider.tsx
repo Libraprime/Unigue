@@ -55,10 +55,12 @@ export default function FirebaseProvider({ children }: { children: ReactNode }) 
       const isAuthPage = ['/login', '/forgot-password', '/signup'].includes(pathname);
 
       if (auth && !isAuthPage) {
+        if (auth.currentUser) return;
         try {
           if (typeof __initial_auth_token !== 'undefined') {
             await signInWithCustomToken(auth, __initial_auth_token);
           } else {
+            console.log("Checking if anonymous sign-in is needed...");
             await signInAnonymously(auth);
           }
         } catch (error) {

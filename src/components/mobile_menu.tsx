@@ -26,6 +26,8 @@ export default function MobileMenu() {
         return () => unsubscribe();
     }, [db, currentUser]);
 
+    console.log("Current User ID:", currentUser?.uid, "Is Anonymous:", currentUser?.isAnonymous);
+
     return (
         <div className="p-3">
             <div className="flex items-center justify-between pb-5">
