@@ -78,20 +78,20 @@ export default function Register() {
   if (firebaseLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500 animate-pulse">Loading...</p>
+        <span className="loading loading-spinner text-warning"></span>
       </div>
     );
   }
 
   return (
-    <div className='font-serif text-black flex flex-col mx-5 items-center'>
+    <div className='font-serif flex flex-col mx-5 items-center'>
       <h1 className='text-center font-bold text-3xl mt-5 uppercase'>Register Account</h1>
       <p className='pt-7'>Let&apos;s create your account</p>
 
       <form onSubmit={handleRegister}>
         {/* FULL NAME */}
         <p className='pt-6 pb-2'>Full Name</p>
-        <label htmlFor='name' className='input validator bg-amber-50'>
+        <label htmlFor='name' className='input validator'>
           {/* Corrected to User Icon */}
           <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
@@ -105,7 +105,7 @@ export default function Register() {
             required
             placeholder='Full Name'
             id='name'
-            className='bg-amber-50'
+            className=''
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -113,7 +113,7 @@ export default function Register() {
 
         {/* EMAIL */}
         <p className='pt-6 pb-2'>Email</p>
-        <label htmlFor='email' className='input validator bg-amber-50'>
+        <label htmlFor='email' className='input validator'>
           <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
             <g strokeLinejoin='round' strokeLinecap='round' strokeWidth='2.5' fill='none' stroke='currentColor'>
               <rect width='20' height='16' x='2' y='4' rx='2'></rect>
@@ -126,7 +126,7 @@ export default function Register() {
             required
             placeholder='account@email.com'
             id='email'
-            className='bg-amber-50'
+            className=''
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -134,7 +134,7 @@ export default function Register() {
 
         {/* PASSWORD */}
         <p className='pt-6 pb-2'>Password</p>
-        <label className='input validator bg-amber-50 flex items-center justify-between' htmlFor='password'>
+        <label className='input validator flex items-center justify-between' htmlFor='password'>
           <div className="flex items-center gap-2 flex-grow">
             <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
               <g strokeLinejoin='round' strokeLinecap='round' strokeWidth='2.5' fill='none' stroke='currentColor'>
@@ -148,7 +148,7 @@ export default function Register() {
               placeholder='Password'
               id='password'
               name='password'
-              className='bg-amber-50 w-full focus:outline-none'
+              className='w-full focus:outline-none'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -171,7 +171,7 @@ export default function Register() {
 
         {/* CONFIRM PASSWORD */}
         <p className='pt-6 pb-2'>Confirm Password</p>
-        <label className='input validator bg-amber-50 flex items-center justify-between' htmlFor='confirm-password'>
+        <label className='input validator flex items-center justify-between' htmlFor='confirm-password'>
           <div className="flex items-center gap-2 flex-grow">
             <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
               <g strokeLinejoin='round' strokeLinecap='round' strokeWidth='2.5' fill='none' stroke='currentColor'>
@@ -185,7 +185,7 @@ export default function Register() {
               placeholder='Confirm Password'
               id='confirm-password'
               name='confirm-password'
-              className='bg-amber-50 w-full focus:outline-none'
+              className='w-full focus:outline-none'
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
@@ -223,7 +223,7 @@ export default function Register() {
         
         {error && <p className='text-red-500 text-sm mb-4'>{error}</p>}
         
-        <div className='flex flex-wrap gap-4 items-center'>
+        <div className='flex flex-wrap justify-between items-center'>
           <button className='btn btn-primary px-8' type='submit' disabled={loading}>
             {loading ? 'CREATING...' : 'CREATE'}
           </button>

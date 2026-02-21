@@ -12,6 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const route = useRouter();
 
   // Use the custom hook to access the Firebase services
@@ -80,7 +81,7 @@ export default function Login() {
 
       <form onSubmit={handleLogin} className='w-full'>
         <p className='pt-10 pb-3'>Email</p>
-        <label htmlFor='email' className='input validator bg-amber-50'>
+        <label htmlFor='email' className='input validator'>
           <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
             <g
               strokeLinejoin='round'
@@ -98,38 +99,50 @@ export default function Login() {
             name='email'
             placeholder='account@email.com'
             id='email'
-            className='bg-amber-50'
+            className=''
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </label>
 
-        <p className='pt-8 pb-3'>Password</p>
-        <label className='input validator bg-amber-50' htmlFor='password'>
-          <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-            <g
-              strokeLinejoin='round'
-              strokeLinecap='round'
-              strokeWidth='2.5'
-              fill='none'
-              stroke='currentColor'
-            >
-              <path d='M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z'></path>
-              <circle cx='16.5' cy='7.5' r='.5' fill='currentColor'></circle>
-            </g>
-          </svg>
-          <input
-            type='password'
-            required
-            placeholder='Password'
-            id='password'
-            name='password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        {/* PASSWORD */}
+        <p className='pt-6 pb-2'>Password</p>
+        <label className='input validator flex items-center justify-between' htmlFor='password'>
+          <div className="flex items-center gap-2 flex-grow">
+            <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
+              <g strokeLinejoin='round' strokeLinecap='round' strokeWidth='2.5' fill='none' stroke='currentColor'>
+                <path d='M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z'></path>
+                <circle cx='16.5' cy='7.5' r='.5' fill='currentColor'></circle>
+              </g>
+            </svg>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              required
+              placeholder='Password'
+              id='password'
+              name='password'
+              className='w-full focus:outline-none'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          
+          {/* Toggle Button */}
+          <button 
+            type="button" 
+            onClick={() => setShowPassword(!showPassword)}
+            className="p-1 hover:bg-amber-100 rounded-full transition-colors"
+            tabIndex={-1} // Prevents tabbing to the eye icon, keeps focus flow on inputs
+          >
+            {showPassword ? (
+              <svg className="h-5 w-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+            ) : (
+              <svg className="h-5 w-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
+            )}
+          </button>
         </label>
 
-        <div className='py-5 ml-48'>
+        <div className='py-5 text-center '>
           <Link href='/forgot-password'>
             Forgot password?
           </Link>

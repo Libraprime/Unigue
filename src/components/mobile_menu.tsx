@@ -26,13 +26,23 @@ export default function MobileMenu() {
         return () => unsubscribe();
     }, [db, currentUser]);
 
+    const handleClose = () => {
+        const elem = document.activeElement as HTMLElement;
+        if (elem) {
+            elem.blur();
+        }
+    };
+
     console.log("Current User ID:", currentUser?.uid, "Is Anonymous:", currentUser?.isAnonymous);
 
     return (
         <div className="p-3">
             <div className="flex items-center justify-between pb-5">
                 <p className="font-medium">Menu</p>
-                <div>
+                <div 
+                    onClick={handleClose} 
+                    className="cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
                     <svg
                         className="fill-current"
                         xmlns="http://www.w3.org/2000/svg"
