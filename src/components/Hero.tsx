@@ -4,7 +4,7 @@ export default function Hero() {
     return(
         <div>
             <div className="glass">
-                <div className="p-5 md:p-20">
+                <div className="p-5 md:p-16">
                     <Logo
                         width={50}
                         height={50}

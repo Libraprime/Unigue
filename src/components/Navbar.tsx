@@ -1,6 +1,7 @@
+import Link from "next/link";
 import MobileMenu from "./mobile_menu";
 
-export default function Header() {
+export default function Navbar() {
     return (
         <div>
             <div className="hidden md:block">
@@ -29,7 +30,7 @@ export default function Header() {
                             </button>
                         </div>
                         
-                        <div>signin</div>
+                        <Link href="/login" className="btn btn-ghost">sign In</Link>
                     </div>
                 </div>
             </div>
