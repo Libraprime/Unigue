@@ -73,23 +73,64 @@ export default function Main_body() {
 
                         <div className="md:flex py-5 md:p-5">
                             {featuresData.map((feature, index) => (
-                                <div key={index} className="flex flex-col items-center justify-center text-center gap-3">
+                                <div key={index} className="flex flex-col items-center py-5 justify-center text-center gap-3">
                                     <Image
                                         src={feature.imageSrc}
                                         alt={feature.alt}
                                         width={50}
                                         height={50}
                                     />
-                                    <p className='mt-5'>{feature.title}</p>
+                                    <p className='mt-3'>{feature.title}</p>
                                     <p className='px-10'>{feature.description}</p>
                                 </div>
                             ))}
                         </div>
+
+                        <div className="flex justify-center flex-col">
+                            <p className="capitalize text-center text-3xl p-5">Popular for you</p>
+
+                            <div className="border flex justify-between p-2 items-center">
+                                <select defaultValue="Filter"className="md:hidden select select-ghost w-20">
+                                    <option>Price</option>
+                                    <option>Color</option>
+                                    <option>Size</option>
+                                    <option>Gender</option>
+                                    <option>Brand</option>
+                                    <option>Type</option>
+                                </select>    
+                                <div className="hidden md:flex gap-5">
+                                    <p>Price</p>
+                                    <p>Color</p>
+                                    <p>Size</p>
+                                    <p>Gender</p>
+                                    <p>Brand</p>
+                                    <p>Type</p>
+                                </div>
+                                <div>
+                                    <p>Sort by</p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-6 p-5">
+                                {PRODUCTS.map((product) => (
+                                    <Card product={product} key={product.id} />
+                                ))}
+                            </div>  
+
+                            <button className="w-full m-auto p-3 text-center btn btn-dash btn-warning">See all popular product</button>
+                        </div>
                     </div>
                 </div>
-                
             </div>
             
+            <div className="m-5 md:m-10 bg-amber-200 dark:bg-base-100 items-center text-center p-5 md:p-10">
+                <p className="text-2xl font-bold pb-2 capitalize">Subscribe to our newsletter</p>
+                <p className="pb-7 text-sm">Type your email down below and get the new notifications about Unigue Stores</p>
+                <div className="join p-3">
+                    <input className="input join-item" placeholder="Email" />
+                    <button className="btn join-item">Subscribe</button>
+                </div>
+            </div>
         </div>
     )
 }

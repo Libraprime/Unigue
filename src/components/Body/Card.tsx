@@ -23,7 +23,7 @@ export default function Card({ product }: { product: { id: number; name: string;
             alt={product.name} 
             width={250} 
             height={350}
-            className="object-cover hover:scale-105 transition-transform duration-300 bg-amber-50 dark:bg-base-100" 
+            className="object-cover hover:scale-105 transition-transform duration-300 bg-amber-200 dark:bg-base-100" 
           />
         </div>
       </div>
