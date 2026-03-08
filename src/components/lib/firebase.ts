@@ -44,7 +44,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getAnalytics, isSupported } from "firebase/analytics";
+import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -65,7 +65,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // 3. Analytics MUST be conditional (Server has no "window" or "document")
-let analytics;
+let analytics: Analytics | undefined;
 if (typeof window !== 'undefined') {
   isSupported().then((supported) => {
     if (supported) analytics = getAnalytics(app);
