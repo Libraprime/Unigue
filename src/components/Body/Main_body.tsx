@@ -1,16 +1,18 @@
 import Card from "./Card";
 import Image from "next/image";
+import { PRODUCTS } from "../lib/product";
 
 
 export default function Main_body() {
     const brands = ["Nike", "Adidas", "Puma", "Reebok", "Gucci", "Prada"];
     const scrollingBrands = [...brands, ...brands]; // Doubles the list for a smooth loop
-    const PRODUCTS = [
-        { id: 1, name: "Nike Air Max", category: "Footwear", price: "15,000", image: "data:image/..." },
-        { id: 2, name: "Adidas Forum", category: "Footwear", price: "18,500", image: "data:image/..." },
-        { id: 3, name: "Puma Suede", category: "Footwear", price: "12,000", image: "data:image/..." },
-        // Add as many as you want here...
-    ];
+    // const PRODUCTS = [
+    //     { id: 1, name: "Nike Air Max", category: "Footwear", price: "15,000", image: "data:image/..." },
+    //     { id: 2, name: "Adidas Forum", category: "Footwear", price: "18,500", image: "data:image/..." },
+    //     { id: 3, name: "Puma Suede", category: "Footwear", price: "12,000", image: "data:image/..." },
+    //     // Add as many as you want here...
+    // ];
+    
 
     const featuresData = [
         {
@@ -39,7 +41,7 @@ export default function Main_body() {
             <div className="flex p-5 opacity-50 overflow-hidden whitespace-nowrap">
                 <div className="flex gap-16 md:gap-36 animate-marquee">
                 {scrollingBrands.map((brand, index) => (
-                    <div key={index} className="flex-shrink-0">
+                    <div key={index} className="shrink-0">
                     {brand}
                     </div>
                 ))}
@@ -78,7 +80,7 @@ export default function Main_body() {
                                         src={feature.imageSrc}
                                         alt={feature.alt}
                                         width={50}
-                                        height={50}
+                                        height={100}
                                     />
                                     <p className='mt-3'>{feature.title}</p>
                                     <p className='px-10'>{feature.description}</p>

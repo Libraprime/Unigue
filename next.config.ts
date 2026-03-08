@@ -2,6 +2,7 @@
 const nextConfig = {
   images: {
     remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'cdn-icons-mp4.flaticon.com' },
       { protocol: 'https', hostname: 'cdn-icons-gif.flaticon.com' },
       { protocol: 'https', hostname: 'unique-736db.firebasestorage.app' },
