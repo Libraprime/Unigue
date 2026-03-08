@@ -4,7 +4,7 @@ import { db } from "@/components/lib/firebase"; // Your firebase init file
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
   // 1. Grab the ID from the URL
-  const { id } = params;
+  const { id } = await params;
 
   // 2. Fetch data from Firestore
   const docRef = doc(db, "products", id);
