@@ -91,7 +91,7 @@ export default function Main_body() {
                         <div className="flex justify-center flex-col">
                             <p className="capitalize text-center text-3xl p-5">Popular for you</p>
 
-                            <div className="border flex justify-between p-2 items-center">
+                            <div className="border flex flex-row-reverse justify-between p-2 items-center">
                                 <select defaultValue="Filter"className="md:hidden select select-ghost w-20">
                                     <option>Price</option>
                                     <option>Color</option>
@@ -113,7 +113,7 @@ export default function Main_body() {
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-6 p-5">
+                            <div className="flex justify-center flex-wrap gap-6 p-5">
                                 {PRODUCTS.map((product) => (
                                     <Card product={product} key={product.id} />
                                 ))}

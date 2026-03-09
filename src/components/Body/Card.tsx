@@ -7,7 +7,7 @@ export default function Card({ product }: { product: { id: number; name: string;
   return (
     // 1. Ensure this path matches your folder name (e.g., /products/)
     // 2. Add scroll={false} to keep the background page from jumping
-    <Link href={`/products/${product.id}`} scroll={false} className="block group">
+    <Link href={`/product/${product.id}`} scroll={false} className="block group">
       <div className="min-w-62.5 snap-center">
         <div className="relative group">
           
@@ -34,9 +34,9 @@ export default function Card({ product }: { product: { id: number; name: string;
           </div>
 
           {/* Product Image */}
-          <div className="rounded-xl overflow-hidden bg-gray-light/20 aspect-[4/5] relative">
+          <div className="rounded-xl overflow-hidden bg-gray-light/20 aspect-4/5 relative">
             <Image 
-              src={product.image} 
+              src={product.image}  
               alt={product.name} 
               fill // Use fill for better responsive handling in cards
               sizes="(max-width: 768px) 100vw, 250px"
