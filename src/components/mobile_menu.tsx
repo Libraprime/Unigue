@@ -6,12 +6,13 @@ import { collection, onSnapshot } from 'firebase/firestore';
 export default function MobileMenu() {
     const{ currentUser, db } = useFirebase();
     const [cartCount, setCartCount] = useState(0);
+    
     const dateJoined = currentUser?.metadata.creationTime 
-        ? new Date(currentUser.metadata.creationTime).toLocaleDateString('en-US', {
-            month: 'long',
-            year: 'numeric'
-            })
-        : "Guest";
+    ? new Date(currentUser.metadata.creationTime).toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+        })
+    : "March 2026"; // Fallback for the current month/year
 
     useEffect(() => {
         if (!db || !currentUser) return;

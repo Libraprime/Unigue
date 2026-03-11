@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function Card({ product }: { product: { id: number; name: string; category: string; price: string; image: string } }) {
   return (
@@ -17,13 +18,21 @@ export default function Card({ product }: { product: { id: number; name: string;
           <div className="absolute top-0 left-0 w-full h-full z-10 pointer-events-none">
             <div className="flex justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
               <button 
-                onClick={(e) => { e.preventDefault(); /* Add to cart logic */ }} 
+                onClick={(e) => { 
+                  e.preventDefault(); /* Add to cart logic */ 
+                  console.log('Added to cart')
+                  toast.success('Added to cart')
+                }} 
                 className="btn btn-circle btn-sm shadow-md"
               >
                 +
               </button>
               <button 
-                onClick={(e) => { e.preventDefault(); /* Like logic */ }} 
+                onClick={(e) => { 
+                  e.preventDefault(); /* Like logic */ 
+                  console.log('Added to favourites') 
+                  toast.success('Successfully added to Favourites')
+                }} 
                 className="btn btn-circle btn-sm shadow-md"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="size-5">

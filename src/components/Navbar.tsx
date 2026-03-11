@@ -46,7 +46,7 @@ export default function Navbar() {
                         </div>
                         <ul
                             tabIndex={0}
-                            className="dropdown-content p-2 bg-base-100 left-0 z-0 top-0 w-80 h-screen">
+                            className="dropdown-content p-2 bg-base-100 left-0 top-0 w-80 h-screen z-999 shadow-2xl">
                             <MobileMenu />
                         </ul>
                         </div>
