@@ -39,6 +39,14 @@ export default function RootLayout({
         2. Added 'font-sans' (or your preferred default) to use Open Sans globally.
       */}
       <body className={`${openSans.variable} ${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+        {/* Sets data-theme before first paint so there's no flash of the
+            wrong theme. Must run synchronously, before React hydrates —
+            see src/components/ThemeToggle.tsx for the toggle itself. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('unigue-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'uniguedark':'uniguelight';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
+        />
         <Toaster position="top-left" />
         <FirebaseProvider>
           {children}

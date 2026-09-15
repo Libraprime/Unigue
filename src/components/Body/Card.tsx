@@ -43,7 +43,7 @@ export default function Card({ product }: { product: { id: number; name: string;
           </div>
 
           {/* Product Image */}
-          <div className="rounded-xl overflow-hidden bg-gray-light/20 aspect-4/5 relative">
+          <div className="rounded-xl overflow-hidden bg-base-200 aspect-4/5 relative">
             <Image 
               src={product.image}  
               alt={product.name} 
