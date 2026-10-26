@@ -1,0 +1,47 @@
+rules_version = '2';
+
+// Firestore security rules for Unigue Stores.
+// Source of truth for the data model: docs/ARCHITECTURE.md ("Data model").
+// Deploy with: firebase deploy --only firestore:rules   (see docs/SETUP.md)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // users/{uid}: profile doc written at sign-up / first Google sign-in.
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      // users/{uid}/cart/{productId}: one doc per product in the bag.
+      match /cart/{productId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.productId is int
+          && request.resource.data.quantity is int
+          && request.resource.data.quantity >= 1
+          && request.resource.data.quantity <= 10;
+      }
+
+      // users/{uid}/favorites/{productId}: one doc per favourited product.
+      match /favorites/{productId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.productId is int;
+      }
+    }
+
+    // newsletter/{autoId}: write-only sign-ups from the storefront footer form.
+    match /newsletter/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['email', 'createdAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() < 255
+        && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+      allow read, update, delete: if false;
+    }
+
+    // Phase 7 (orders, reviews, ...) must add its own rules. Default is deny.
+  }
+}

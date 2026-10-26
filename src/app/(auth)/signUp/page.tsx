@@ -1,18 +1,10 @@
-import React from 'react'
-import  Register  from './register'
-import Sidebar from '@/components/sidebar'
+import type { Metadata } from "next";
+import Register from "./register";
+import { safeReturnTo } from "@/components/lib/returnTo";
 
-function page() {
-  return (
-    <div className='flex flex-col-reverse md:grid md:grid-cols-3'>
-      <div className='grid-cols-1 h-full'>
-        <Sidebar /> 
-      </div>
-      <div className='w-full col-span-2'>
-        <Register />
-      </div>
-    </div>
-  )
+export const metadata: Metadata = { title: "Create account" };
+
+export default async function SignUpPage({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
+  const { returnTo } = await searchParams;
+  return <Register returnTo={safeReturnTo(returnTo)} />;
 }
-
-export default page

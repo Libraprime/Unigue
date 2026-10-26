@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Open_Sans } from "next/font/google"; // Consolidated
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import FirebaseProvider from '../components/FirebaseProvider';
+import ShopProvider from '../components/ShopProvider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,8 +23,8 @@ const openSans = Open_Sans({
 
 // Next.js uses this metadata object to automatically populate your <head>
 export const metadata: Metadata = {
-  title: "Unique Stores",
-  description: "High-quality products for your needs",
+  title: { default: "Unigue Stores", template: "%s | Unigue Stores" },
+  description: "Footwear and luxury sneakers, delivered across Nigeria.",
 };
 
 export default function RootLayout({
@@ -49,8 +50,10 @@ export default function RootLayout({
         />
         <Toaster position="top-left" />
         <FirebaseProvider>
-          {children}
-          {modal}
+          <ShopProvider>
+            {children}
+            {modal}
+          </ShopProvider>
         </FirebaseProvider>
       </body>
     </html>

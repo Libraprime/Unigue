@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 const STORAGE_KEY = 'unigue-theme';
 const LIGHT = 'uniguelight';
@@ -12,18 +12,24 @@ const DARK = 'uniguedark';
  * anti-flash script in layout.tsx, which sets the initial theme before
  * first paint so there's no flash of the wrong theme on load.
  */
-export default function ThemeToggle() {
-  const [theme, setTheme] = useState<string | null>(null);
+function subscribe(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  return () => observer.disconnect();
+}
+const getSnapshot = () => document.documentElement.getAttribute('data-theme') || LIGHT;
+// null on the server / during hydration so the first paint matches the server HTML.
+const getServerSnapshot = () => null;
 
-  useEffect(() => {
-    setTheme(document.documentElement.getAttribute('data-theme') || LIGHT);
-  }, []);
+export default function ThemeToggle() {
+  // The <html data-theme> attribute (set before paint by the script in
+  // layout.tsx) is the source of truth; we just observe it.
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   function toggle() {
     const next = theme === DARK ? LIGHT : DARK;
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem(STORAGE_KEY, next);
-    setTheme(next);
   }
 
   // Avoid rendering the wrong icon for a frame before we've read the
