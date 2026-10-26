@@ -1,6 +1,7 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Logo from './Logo';
 
 const featuresData = [
   {
@@ -51,11 +52,9 @@ function Sidebar() {
   const currentFeature = featuresData[currentIndex];
 
   return (
-    <aside data-theme="luxury" className='bg-base font-serif grid-cols-1 h-screen'>
+    <aside className='bg-base-100 grid-cols-1 h-screen'>
       <div className='flex items-center flex-col pt-32'>
-        <Image
-          src='/logo.png'
-          alt='Unique Logo'
+        <Logo
           width={150}
           height={40}
         />

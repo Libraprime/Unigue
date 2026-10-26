@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div data-theme="luxury" className="items-center justify-center h-screen flex flex-col">
+    <div className="items-center justify-center h-screen flex flex-col">
       <Sidebar />
       <div>
         <button className="btn capitalize mb-10">

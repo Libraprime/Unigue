@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname } from 'next/navigation';
+
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 // Import types for the Firebase services.
 import { type FirebaseApp } from "firebase/app";
@@ -8,7 +10,7 @@ import { type Firestore } from "firebase/firestore";
 import { type Auth, onAuthStateChanged, type User, signInWithCustomToken, signInAnonymously } from "firebase/auth";
 
 // ✅ Import initialized Firebase services from your lib
-import { app, analytics, db, auth } from "../../lib/firebase";
+import { app, analytics, db, auth } from "./lib/firebase";
 
 // Declare global variables provided by the Canvas environment.
 declare let __initial_auth_token: string | undefined;
@@ -44,17 +46,21 @@ export const useFirebase = () => {
 export default function FirebaseProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const pathname = usePathname();
 
   // This effect handles the initial authentication.
   useEffect(() => {
     const authUser = async () => {
-      if (auth) {
+      // Only sign in anonymously if NOT on an auth-related page
+      const isAuthPage = ['/login', '/forgot-password', '/signup'].includes(pathname);
+
+      if (auth && !isAuthPage) {
+        if (auth.currentUser) return;
         try {
           if (typeof __initial_auth_token !== 'undefined') {
-            console.log("Signing in with custom token.");
             await signInWithCustomToken(auth, __initial_auth_token);
           } else {
-            console.log("Signing in anonymously.");
+            console.log("Checking if anonymous sign-in is needed...");
             await signInAnonymously(auth);
           }
         } catch (error) {
@@ -63,7 +69,7 @@ export default function FirebaseProvider({ children }: { children: ReactNode }) 
       }
     };
     authUser();
-  }, []);
+  }, [pathname]); // Re-run if path changes
 
   // This effect listens for auth state changes.
   useEffect(() => {

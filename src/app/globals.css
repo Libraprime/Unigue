@@ -1,28 +1,112 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, luxury --luxury;
-}
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+  themes: uniguelight --default, uniguedark --prefersdark;
 }
 
+/* --- Unigue light theme ---------------------------------------------- */
+@plugin "daisyui/theme" {
+  name: "uniguelight";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #ffffff;
+  --color-base-200: #f4f4f5;
+  --color-base-300: #e5e5e7;
+  --color-base-content: #16181c;
+
+  --color-primary: #1f2328;
+  --color-primary-content: #ffffff;
+
+  --color-secondary: #4b5058;
+  --color-secondary-content: #ffffff;
+
+  --color-accent: #c9962c;
+  --color-accent-content: #1f2328;
+
+  --color-neutral: #1f2328;
+  --color-neutral-content: #ffffff;
+
+  --color-info: #3b6fb0;
+  --color-info-content: #ffffff;
+  --color-success: #2f7a4f;
+  --color-success-content: #ffffff;
+  --color-warning: #c9962c;
+  --color-warning-content: #1f2328;
+  --color-error: #b3403a;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+}
+
+/* --- Unigue dark theme -------------------------------------------------
+   Buttons/CTAs invert (light fill on dark ground) to keep the same
+   hierarchy the light theme has, rather than just dimming everything. */
+@plugin "daisyui/theme" {
+  name: "uniguedark";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #15171a;
+  --color-base-200: #1e2126;
+  --color-base-300: #2a2d33;
+  --color-base-content: #f2f2f0;
+
+  --color-primary: #f2f2f0;
+  --color-primary-content: #15171a;
+
+  --color-secondary: #c4c7cc;
+  --color-secondary-content: #15171a;
+
+  --color-accent: #e0b354;
+  --color-accent-content: #15171a;
+
+  --color-neutral: #1b1d21;
+  --color-neutral-content: #f2f2f0;
+
+  --color-info: #6ea3e0;
+  --color-info-content: #15171a;
+  --color-success: #5cb884;
+  --color-success-content: #15171a;
+  --color-warning: #e0b354;
+  --color-warning-content: #15171a;
+  --color-error: #e07a72;
+  --color-error-content: #15171a;
+
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+}
+
+/* Ties the `dark:` variant to our dark theme instead of the OS preference,
+   so it follows the toggle (localStorage-backed) rather than the system
+   setting. Pre-existing `dark:` utilities in the codebase (Card.tsx,
+   Main_body.tsx, the quick-view modal) start working correctly under this. */
+@custom-variant dark (&:where([data-theme="uniguedark"], [data-theme="uniguedark"] *));
+
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-open-sans), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Hides scrollbars while keeping the element scrollable. Written directly
+   instead of relying on the tailwind-scrollbar-hide plugin, since that
+   plugin was never actually wired up (see docs/adr/0003). */
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
 }

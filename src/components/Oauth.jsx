@@ -4,7 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 // import { usePathname } from 'next/navigation'
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { auth, db } from '../../../lib/firebase'
+import { auth, db } from './lib/firebase'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 
@@ -46,7 +46,7 @@ export default function Oauth() {
       <button
         type="button"
         onClick={onGoogleClick}
-        className="p-2 border rounded"
+        className="p-2 border rounded cursor-pointer hover:shadow-md transition-shadow flex items-center"
       >
         <Image 
           src="/google.png"
