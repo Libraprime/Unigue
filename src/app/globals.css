@@ -95,6 +95,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Brand strip marquee (Body/BrandStrip.tsx). The track is rendered twice
+   side by side, so translating by -50% loops seamlessly. `animate-marquee`
+   was referenced by the old Main_body but never defined; this fixes that. */
+@theme {
+  --animate-marquee: marquee 30s linear infinite;
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
+}
+
 /* Hides scrollbars while keeping the element scrollable. Written directly
    instead of relying on the tailwind-scrollbar-hide plugin, since that
    plugin was never actually wired up (see docs/adr/0003). */

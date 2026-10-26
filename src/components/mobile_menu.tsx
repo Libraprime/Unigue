@@ -1,99 +1,78 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useFirebase } from './FirebaseProvider';
-import { collection, onSnapshot } from 'firebase/firestore';
+"use client";
 
-export default function MobileMenu() {
-    const{ currentUser, db } = useFirebase();
-    const [cartCount, setCartCount] = useState(0);
-    
-    const dateJoined = currentUser?.metadata.creationTime 
-    ? new Date(currentUser.metadata.creationTime).toLocaleDateString('en-US', {
-        month: 'long',
-        year: 'numeric'
-        })
-    : "March 2026"; // Fallback for the current month/year
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useFirebase } from "./FirebaseProvider";
+import { useShop } from "./ShopProvider";
+import { CloseIcon, MenuIcon } from "./icons";
 
-    useEffect(() => {
-        if (!db || !currentUser) return;
+interface NavLink {
+  label: string;
+  href: string;
+}
 
-        // Assuming your DB path is: users/{uid}/cart
-        const cartRef = collection(db, "users", currentUser.uid, "cart");
-        
-        const unsubscribe = onSnapshot(cartRef, (snapshot) => {
-            setCartCount(snapshot.size);
-        });
+/**
+ * Slide-in menu for small screens (the desktop links live in Navbar). Bag and
+ * favourite counts come from ShopProvider — this component no longer opens
+ * its own Firestore listener.
+ */
+export default function MobileMenu({ links }: { links: NavLink[] }) {
+  const [open, setOpen] = useState(false);
+  const { currentUser } = useFirebase();
+  const { cartCount, favorites } = useShop();
+  const signedIn = !!currentUser && !currentUser.isAnonymous;
 
-        return () => unsubscribe();
-    }, [db, currentUser]);
-
-    const handleClose = () => {
-        const elem = document.activeElement as HTMLElement;
-        if (elem) {
-            elem.blur();
-        }
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
     };
+  }, [open]);
 
-    console.log("Current User ID:", currentUser?.uid, "Is Anonymous:", currentUser?.isAnonymous);
+  const close = () => setOpen(false);
+  const item = "block py-3 text-lg font-medium border-b border-base-300";
 
-    return (
-        <div className="p-3">
-            <div className="flex items-center justify-between pb-5">
-                <p className="font-medium">Menu</p>
-                <div 
-                    onClick={handleClose} 
-                    className="cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                    <svg
-                        className="fill-current"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 512 512">
-                        <polygon
-                        points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49" />
-                    </svg>
-                </div>
+  return (
+    <div className="md:hidden">
+      <button type="button" className="btn btn-ghost btn-circle" aria-label="Open menu" aria-expanded={open} onClick={() => setOpen(true)}>
+        <MenuIcon />
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Menu">
+          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/50" onClick={close} />
+          <div className="absolute inset-y-0 left-0 flex w-80 max-w-[85%] flex-col bg-base-100 p-5 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="font-bold">Menu</p>
+              <button type="button" className="btn btn-ghost btn-circle btn-sm" aria-label="Close menu" onClick={close}>
+                <CloseIcon />
+              </button>
             </div>
-
-            <div className="flex items-center gap-3 mb-4">
-                <div className="avatar">
-                    <div className="w-16 rounded-full">
-                        <img src={currentUser?.photoURL || "https://img.daisyui.com/images/profile/demo/yellingcat@192.webp"} />
-                    </div>
-                </div>
-                <div className="p-3">
-                    <p className="text-lg font-bold">Hi, {currentUser?.displayName || "Guest"}</p>
-                    <p className="text-sm">member since {dateJoined}</p>
-                </div>
-            </div>
-
-            <div className="mb-10">
-                <label htmlFor="search" className="input mb-5">
-                    <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <g
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                        strokeWidth="2.5"
-                        fill="none"
-                        stroke="currentColor"
-                        >
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.3-4.3"></path>
-                        </g>
-                    </svg>
-                    <input id="search" type="search" required placeholder="Search" />
-                </label>
-                
-                <div className="font-medium">
-                    <p className="pb-4">My Cart({cartCount} Items)</p>
-                    <p className="pb-4">Favourites</p>
-                    <p className="pb-4">Men</p>
-                    <p className="pb-4">Women</p>
-                    <p className="pb-4">Kids</p>
-                    <p className="pb-4">Brands</p>
-                </div>
-            </div>
+            <p className="mb-2 text-sm text-base-content/70">
+              {signedIn ? `Hi, ${currentUser?.displayName || currentUser?.email}` : "Browsing as guest"}
+            </p>
+            <nav className="flex flex-col" onClick={close}>
+              {links.map((l) => (
+                <Link key={l.href} href={l.href} className={item}>{l.label}</Link>
+              ))}
+              <Link href="/bag" className={item}>Bag ({cartCount})</Link>
+              <Link href="/favorites" className={item}>Favourites ({favorites.length})</Link>
+              {signedIn ? (
+                <>
+                  <Link href="/orders" className={item}>Orders</Link>
+                  <Link href="/account" className={item}>Account</Link>
+                </>
+              ) : (
+                <Link href="/login" className={item}>Sign in</Link>
+              )}
+            </nav>
+          </div>
         </div>
-    )
+      )}
+    </div>
+  );
 }

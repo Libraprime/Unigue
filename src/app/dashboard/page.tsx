@@ -1,15 +1,7 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Footer from "@/components/Footer";
-import Main_body from "@/components/Body/Main_body";
+import { redirect } from "next/navigation";
 
-export default function DashboardPage() {
-    return (
-        <div>
-            <Navbar />
-            <Hero />
-            <Main_body />
-            <Footer />
-        </div>
-    );
+// The storefront now lives at `/` (Phase 2). `/dashboard` is kept only so old
+// bookmarks and links keep working.
+export default function DashboardRedirect() {
+  redirect("/");
 }

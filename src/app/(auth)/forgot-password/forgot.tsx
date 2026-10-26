@@ -1,95 +1,58 @@
-'use client'
-import React, { useState } from 'react';
-import Link from 'next/link';
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { useFirebase } from '../../../components/FirebaseProvider'
+import AuthShell from "@/components/auth/AuthShell";
+import { useFirebase } from "@/components/FirebaseProvider";
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { auth } = useFirebase();
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
 
-  const { auth, loading: firebaseLoading } = useFirebase();
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
-    setSuccess(null);
+    setSent(false);
+    if (!auth) return setError("Auth service is not available.");
 
-    if (!auth) {
-      setError("Auth service is not available.");
-      setLoading(false);
-      return;
-    }
-
+    setBusy(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      setSuccess("Password reset email sent! Please check your inbox.");
-    } catch (err: unknown) {
+      setSent(true);
+    } catch (err) {
       console.error(err);
-      if (
-        typeof err === 'object' &&
-        err !== null &&
-        'code' in err &&
-        typeof (err as { code?: unknown }).code === 'string' &&
-        ((err as { code: string }).code === 'auth/invalid-email' || (err as { code: string }).code === 'auth/user-not-found')
-      ) {
-        setError("Invalid email address.");
-      } else {
-        setError("Failed to send reset email. Please try again.");
-      }
+      const code = (err as { code?: string }).code;
+      setError(
+        code === "auth/invalid-email" || code === "auth/user-not-found"
+          ? "Invalid email address."
+          : "Failed to send reset email. Please try again.",
+      );
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
-  };
-
-  if (firebaseLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <span className="loading loading-spinner text-warning"></span>
-      </div>
-    );
   }
 
   return (
-    <div className='h-screen font-serif flex flex-col mx-5 md:mx-52 items-start'>
-      <h1 className='font-bold text-3xl mt-5 md:mt-32 uppercase'>Forgot password</h1>
-      <p className='pt-10'>We will send a new password reset link to your email</p>
+    <AuthShell title="Forgot password" subtitle="We'll email you a link to reset it">
+      <form onSubmit={onSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="mb-2 block text-sm font-medium">Email</label>
+          <input id="email" name="email" type="email" required autoComplete="email" placeholder="account@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="input w-full" />
+        </div>
 
-      <form onSubmit={handleSubmit} className='w-full'>
-        <p className='pt-10 pb-3'>Email</p>
-        <label htmlFor='email' className='input validator'>
-          <svg className='h-[1em] opacity-50' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-            <g strokeLinejoin='round' strokeLinecap='round' strokeWidth='2.5' fill='none' stroke='currentColor'>
-              <rect width='20' height='16' x='2' y='4' rx='2'></rect>
-              <path d='m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'></path>
-            </g>
-          </svg>
-          <input
-            type='email'
-            name='email'
-            placeholder='account@email.com'
-            id='email'
-            className='bg-amber-50'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
+        {error && <p role="alert" className="text-sm text-error">{error}</p>}
+        {sent && <p role="status" className="text-sm text-success">Password reset email sent. Please check your inbox.</p>}
 
-        {error && <p className="text-red-500 mt-2">{error}</p>}
-        {success && <p className="text-green-600 mt-2">{success}</p>}
-
-        <button className='btn block btn-base w-48 my-5' type='submit' disabled={loading}>
-          {loading ? 'Submitting...' : 'SUBMIT'}
+        <button type="submit" className="btn btn-primary w-full" disabled={busy}>
+          {busy ? <span className="loading loading-spinner loading-sm" /> : "Send reset link"}
         </button>
+
+        <Link href="/login" className="inline-block text-sm hover:underline">Back to login</Link>
       </form>
-
-      <Link href="/login" className="text-amber-500 mt-2">
-
-        Back to login
-      </Link>
-    </div>
+    </AuthShell>
   );
 }

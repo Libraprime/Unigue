@@ -1,21 +1,24 @@
 "use client";
 
-import { usePathname } from 'next/navigation';
-
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-// Import types for the Firebase services.
+import { usePathname } from "next/navigation";
+import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { type FirebaseApp } from "firebase/app";
 import { type Analytics } from "firebase/analytics";
 import { type Firestore } from "firebase/firestore";
-import { type Auth, onAuthStateChanged, type User, signInWithCustomToken, signInAnonymously } from "firebase/auth";
+import {
+  type Auth,
+  type User,
+  onAuthStateChanged,
+  onIdTokenChanged,
+  signInAnonymously,
+  signInWithCustomToken,
+} from "firebase/auth";
 
-// ✅ Import initialized Firebase services from your lib
 import { app, analytics, db, auth } from "./lib/firebase";
 
-// Declare global variables provided by the Canvas environment.
+// Provided by the Canvas environment; undefined everywhere else.
 declare let __initial_auth_token: string | undefined;
 
-// Define the type for our Firebase services object, including the possibility of null or undefined.
 interface FirebaseServices {
   app: FirebaseApp | null;
   analytics: Analytics | undefined;
@@ -25,7 +28,6 @@ interface FirebaseServices {
   loading: boolean;
 }
 
-// Create the context with a default value that matches the interface.
 const FirebaseContext = createContext<FirebaseServices>({
   app,
   analytics: undefined,
@@ -35,81 +37,75 @@ const FirebaseContext = createContext<FirebaseServices>({
   loading: true,
 });
 
-export const useFirebase = () => {
-  const context = useContext(FirebaseContext);
-  if (context === null) {
-    throw new Error("useFirebase must be used within a FirebaseProvider");
-  }
-  return context;
-};
+export const useFirebase = () => useContext(FirebaseContext);
 
+/**
+ * Pages where we must NOT silently create a guest session: someone arriving
+ * cold at the login/register screen should get a plain account, not a
+ * throwaway anonymous one. Case-insensitive because the register route is
+ * `/signUp` (this used to compare against `/signup` and never matched).
+ */
+const AUTH_PATHS = ["/login", "/signup", "/forgot-password"];
+const isAuthPath = (pathname: string) => AUTH_PATHS.includes(pathname.toLowerCase());
+
+/**
+ * Does NOT block rendering while auth resolves. It used to return a full-page
+ * "Loading..." until the first auth event, which meant the server-rendered
+ * HTML of every page was an empty spinner — defeating ADR 0001's "crawlable
+ * without auth" goal. Auth-dependent UI now reads `loading` from the context
+ * (Navbar shows a placeholder, RequireAuth shows a spinner).
+ */
 export default function FirebaseProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  // If Auth failed to initialise there is nothing to wait for.
+  const [loading, setLoading] = useState<boolean>(!!auth);
+  // Linking an anonymous user to an email/Google account keeps the same User
+  // object (so React state doesn't change) but flips `isAnonymous`. Bumping
+  // this on token changes re-renders consumers so they see the new state.
+  const [, bumpRevision] = useReducer((n: number) => n + 1, 0);
   const pathname = usePathname();
+  const anonymousInFlight = useRef(false);
 
-  // This effect handles the initial authentication.
+  // Listen for auth state + token changes.
   useEffect(() => {
-    const authUser = async () => {
-      // Only sign in anonymously if NOT on an auth-related page
-      const isAuthPage = ['/login', '/forgot-password', '/signup'].includes(pathname);
-
-      if (auth && !isAuthPage) {
-        if (auth.currentUser) return;
-        try {
-          if (typeof __initial_auth_token !== 'undefined') {
-            await signInWithCustomToken(auth, __initial_auth_token);
-          } else {
-            console.log("Checking if anonymous sign-in is needed...");
-            await signInAnonymously(auth);
-          }
-        } catch (error) {
-          console.error("Authentication failed:", error);
-        }
-      }
-    };
-    authUser();
-  }, [pathname]); // Re-run if path changes
-
-  // This effect listens for auth state changes.
-  useEffect(() => {
-    if (auth) {
-      console.log("Setting up auth state listener...");
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        console.log("Auth state changed. Current user:", user);
-        setCurrentUser(user);
-        setLoading(false);
-      });
-
-      return () => {
-        console.log("Cleaning up auth state listener.");
-        unsubscribe();
-      };
-    } else {
+    if (!auth) {
       console.error("Firebase Auth service is not available.");
-      setLoading(false);
+      return;
     }
+    const offState = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+    const offToken = onIdTokenChanged(auth, () => bumpRevision());
+    return () => {
+      offState();
+      offToken();
+    };
   }, []);
 
-  const contextValue: FirebaseServices = {
-    app,
-    analytics,
-    auth,
-    db,
-    currentUser,
-    loading,
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Loading...</p>
-      </div>
-    );
-  }
+  // Give every visitor a guest session once we know there is no user, except
+  // on auth pages. Re-runs after sign-out, so the storefront never sits
+  // without a session. (ADR 0002)
+  useEffect(() => {
+    if (!auth || loading || currentUser || isAuthPath(pathname) || anonymousInFlight.current) return;
+    anonymousInFlight.current = true;
+    const start =
+      typeof __initial_auth_token !== "undefined"
+        ? signInWithCustomToken(auth, __initial_auth_token)
+        : signInAnonymously(auth);
+    start
+      .catch((error) => {
+        // Most likely cause: Anonymous sign-in is not enabled in the Firebase
+        // console (see docs/SETUP.md).
+        console.error("Guest sign-in failed:", error);
+      })
+      .finally(() => {
+        anonymousInFlight.current = false;
+      });
+  }, [loading, currentUser, pathname]);
 
   return (
-    <FirebaseContext.Provider value={contextValue}>
+    <FirebaseContext.Provider value={{ app, analytics, auth, db, currentUser, loading }}>
       {children}
     </FirebaseContext.Provider>
   );
