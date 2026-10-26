@@ -10,7 +10,7 @@
 > the earlier reasoning.
 
 ## Last updated
-2026-09-09 (Phase 1 landed)
+2026-10-20 (Phases 1–6 landed; Phase 7 not started)
 
 ## Context
 
@@ -41,11 +41,12 @@ grids, split-screen auth) and the underlying browsing/auth logic.
 | # | Phase | Status | Notes |
 |---|-------|--------|-------|
 | 1 | Design tokens + theme system (light/dark) | Done | Two daisyUI themes (`uniguelight`/`uniguedark`) + toggle in Navbar. See ADR 0003. |
-| 2 | Restructure routing: public storefront | Not started | Promote current `/dashboard` content to `/`; retire splash gate |
-| 3 | Guard the commitment points | Not started | Add to Bag, Checkout, Order History, Account Settings require auth |
-| 4 | Guest session + account merge | Not started | Use existing anonymous auth in `FirebaseProvider`; `linkWithCredential` on signup |
-| 5 | Visual redesign of core components | Not started | Navbar, Hero, Card/Gcard, Footer — consumes Phase 1 tokens |
-| 6 | Finish auth pages + quick-view modal | Not started | Split-screen login/signup/forgot-password; finish `@modal/(.)products/[id]` |
+| 2 | Restructure routing: public storefront | Done | Storefront is `/` under the `(shop)` route group; splash gate removed; `/dashboard` redirects to `/`. |
+| 3 | Guard the commitment points | Done | `<RequireAuth>` + validated `returnTo` on `/checkout`, `/orders`, `/account`. See ADR 0006. Page bodies are Phase 7 placeholders. |
+| 4 | Guest session + account merge | Done | Bag/favourites in Firestore per UID; sign-up links the guest, login merges. See ADRs 0004, 0005. Needs console setup: `docs/SETUP.md`. |
+| 5 | Visual redesign of core components | Done | Navbar, Hero, Card, Footer, home sections rebuilt on tokens. `Gcard` removed (unused). |
+| 6 | Finish auth pages + quick-view modal | Done | Split-screen login/signUp/forgot-password; modal route renamed `(.)product` so it actually intercepts. |
+| 7 | Commerce flows (post-redesign) | Not started | Category/search pages, filters, product detail extras, bag + checkout design, payment, orders, account settings. See below. |
 
 Status values: `Not started` → `In progress` → `Blocked` (with reason) → `Done`.
 
@@ -68,43 +69,112 @@ Status values: `Not started` → `In progress` → `Blocked` (with reason) → `
   newsletter section (`Main_body.tsx`) and product card image now actually
   switches on dark mode for the first time — worth a visual check once
   Phase 5 restyles those sections.
+- Later touch-up (Phases 2–6 change): `ThemeToggle` now observes the
+  `data-theme` attribute with `useSyncExternalStore` instead of copying it into
+  state inside an effect. Behaviour is unchanged; it satisfies the
+  `react-hooks/set-state-in-effect` lint rule, which could not run before the
+  ESLint config was repaired (below).
 - **Depends on:** nothing. **Blocks:** Phase 5 (redesign consumes these
   tokens, not be redone after).
 
-### 2. Restructure routing: public storefront
-- Move `Navbar` + `Hero` + `Main_body` + `Footer` (currently only rendered at
-  `/dashboard`) to be the public root `/`.
-- Remove the splash-screen "Proceed to login" gate at the current `/`.
-- **Depends on:** nothing (can run parallel to Phase 1). **Blocks:** Phases 3–4.
+### 2. Restructure routing: public storefront — Done
+- Storefront pages live in the `src/app/(shop)/` route group, whose layout
+  renders `Navbar` + `Footer`. The group does not change URLs: `/`,
+  `/product/[id]`, `/bag`, `/favorites`, `/checkout`, `/orders`, `/account`,
+  `/Info/*`. The `(auth)` group keeps its own split-screen layout.
+- Splash gate removed. `/dashboard` is kept as a redirect to `/` for old
+  bookmarks (resolves the earlier open question).
+- `FirebaseProvider` no longer blocks rendering behind a full-page "Loading...":
+  that made every page's server HTML an empty spinner and broke ADR 0001's
+  SEO goal. Auth-dependent UI reads `loading` from context instead.
+- `/product/[id]` is a server component with `generateStaticParams` and
+  per-product metadata.
+- **Depends on:** nothing. **Blocks:** Phases 3–4.
 
-### 3. Guard the commitment points
-- Add auth checks only on: Add to Bag → Checkout, Order History, Account
-  Settings.
-- Unauthenticated attempt → redirect to `/login?returnTo=<path>` or open a
-  login modal, resuming the action after sign-in.
+### 3. Guard the commitment points — Done
+- Guarded: `/checkout`, `/orders`, `/account` (wrapped in `<RequireAuth>`).
+  Adding to the bag is intentionally open to guests (ADR 0006).
+- Unauthenticated (or guest) → `/login?returnTo=<path>`; after login or
+  sign-up the person returns there. `returnTo` is validated (`safeReturnTo`).
+- The three guarded pages render a `ComingSoon` body until Phase 7. The guard
+  is final; only the body is replaced.
 - **Depends on:** Phase 2.
 
-### 4. Guest session + account merge
-- `FirebaseProvider` already calls `signInAnonymously` on non-auth pages —
-  reuse this for guest favorites/cart instead of building a new mechanism.
-- On login/signup, call `linkWithCredential` to upgrade the anonymous session
-  instead of discarding it, so guest activity carries into the real account.
+### 4. Guest session + account merge — Done
+- `FirebaseProvider` creates a guest session on non-auth pages and now
+  re-creates one after sign-out. Fixed a path bug: the exclusion list had
+  `/signup` but the route is `/signUp`, so guests were created on the register
+  page too.
+- Sign-up (email/Google) **links** the guest (same UID). Login to an existing
+  account **merges** guest bag/favourites into it (ADR 0005, which clarifies
+  ADR 0002). All in `lib/auth.ts` + `lib/guest.ts`.
+- Data layer: `ShopProvider`/`useShop()` over `users/{uid}/cart` and
+  `users/{uid}/favorites`; products behind `lib/product.ts` (ADR 0004). A
+  minimal `/bag` and `/favorites` page make it usable.
+- Email sign-up now also creates the `users/{uid}` profile doc (previously only
+  Google sign-in did).
+- **Requires** Anonymous sign-in enabled and `firestore.rules` deployed
+  (`docs/SETUP.md`).
 - **Depends on:** Phase 2.
 
-### 5. Visual redesign of core components
-- Rebuild `Navbar`, `Hero`, `Card`/`Gcard`, `Footer` using Phase 1 tokens and
+### 5. Visual redesign of core components — Done
+- Rebuilt `Navbar`, `Hero`, `Card`/`Gcard`, `Footer` using Phase 1 tokens and
   the Figma reference layout (bold headline treatment, clean grid product
-  cards, minimal chip filters, dark footer).
-- Replace remaining placeholders: Lorem ipsum copy, broken `video src="null"`,
-  generic stock icons.
+  cards, chip filters, dark footer).
+- Placeholders replaced: real hero copy, no `video src="null"`, inline SVG
+  icons instead of Flaticon GIFs, the undefined `animate-marquee` now has real
+  keyframes, the malformed `snap-x mandatory` fixed, and the Phase 1 follow-up
+  (`bg-amber-200 dark:...`) removed in favour of tokens.
+- Home sections: brand strip, New arrivals carousel (products with
+  `isNew`), features row, "Popular for you" grid with category chips (URL
+  param `?category=`) and price sort, newsletter (writes to `newsletter`).
+- Navbar links are real: Shop + one link per catalog category. The reference's
+  Men/Women/Kids/Brands and the search icon are NOT included because the
+  catalog has no gender/brand data and there are no category/search pages yet
+  (Phase 7).
+- `Gcard` deleted (no imports; superseded by `Card`).
 - **Depends on:** Phase 1 (tokens), Phase 2 (final page structure).
 
-### 6. Finish auth pages + quick-view modal
-- Redesign `login` / `signUp` / `forgot-password` as split-screen layout (dark
+### 6. Finish auth pages + quick-view modal — Done
+- Redesigned `login` / `signUp` / `forgot-password` as split-screen layout (dark
   brand panel + form), matching the Figma reference.
-- Finish the already-scaffolded `@modal/(.)products/[id]` intercepting route
-  so product clicks open a quick-view overlay instead of a full navigation.
+- Shared `AuthShell`, `PasswordInput` and a typed `Oauth` replace ~250 lines of
+  duplicated markup. The old rotating `Sidebar` is gone. The nested second
+  `FirebaseProvider` in the auth layout was removed.
+- Quick-view modal: the intercepting folder was `(.)products` while the route
+  is `/product/[id]`, so it never intercepted. Renamed to `(.)product`; it now
+  uses theme tokens, closes on Esc/backdrop, locks scroll, and has real
+  Add to bag / favourite / Buy now actions. A hard load shows the full page.
 - **Depends on:** Phase 1, Phase 2.
+
+### 7. Commerce flows (post-redesign) — Not started
+Everything the reference screens in `docs/screens` show beyond browse + auth.
+Suggested order; each item that makes a real decision gets an ADR:
+- Category pages and search + search results; full filter set (price, colour,
+  size, gender, brand, type) — needs richer catalog data first. Men / Women /
+  Kids / Brands navigation depends on this.
+- Product detail extras: size selection + size guide, image gallery, reviews,
+  "Added to Bag" popup. Cart lines will need a size/variant dimension.
+- Bag and checkout redesigned to the screens: information, delivery, payment,
+  billing. Totals must be recomputed server-side (ADR 0004).
+- Payment provider integration (Paystack or Flutterwave suggested for
+  Nigeria) behind a single interface.
+- Orders (ongoing/history) and order Firestore rules; account settings and edit
+  account. Replace the `ComingSoon` bodies on `/checkout`, `/orders`,
+  `/account` (guards are already in place).
+- Move the catalog to Firestore/CMS if it grows (change `lib/product.ts` only).
+- Replace stub legal pages (`/Info/*`) with real content; real newsletter
+  delivery; real social links in the footer.
+- **Depends on:** Phases 1–6.
+
+## Housekeeping done alongside Phases 2–6
+
+- `eslint.config.mjs` rewritten for Next 16's flat config (`FlatCompat` crashed
+  with a circular-JSON error) and `npm run lint` now runs `eslint .`
+  (`next lint` no longer exists in Next 16). Lint, `tsc` and `next build` all pass.
+- `firebase-debug.log` and `.firebase/` are gitignored; `.env.example` added.
+- `firebase.json` added (points at `firestore.rules`) so rules can be deployed.
+- Removed debug `console.log`s that printed the full auth user object.
 
 ## Decision log
 
@@ -113,9 +183,20 @@ Significant decisions get a full ADR in `docs/adr/`. Quick index:
 - [ADR 0001](./adr/0001-public-storefront-browsing.md) — Public storefront browsing, auth only at commitment points
 - [ADR 0002](./adr/0002-guest-account-merge.md) — Guest sessions via anonymous auth + account linking
 - [ADR 0003](./adr/0003-design-tokens-and-theme-system.md) — Design tokens via daisyUI custom themes, single dark-mode mechanism
+- [ADR 0004](./adr/0004-catalog-and-user-data-layer.md) — Static catalog behind a repository; bag and favourites in Firestore
+- [ADR 0005](./adr/0005-login-merges-guest-data.md) — Logging in merges guest data instead of linking (clarifies ADR 0002)
+- [ADR 0006](./adr/0006-auth-guard-and-commit-points.md) — One client-side auth guard; which actions are commitment points
+
+## Where to read next
+
+- `docs/ARCHITECTURE.md` — how the app is put together today (routes,
+  providers, data model, conventions).
+- `docs/SETUP.md` — environment, Firebase console settings, rules, scripts.
 
 ## Open questions
 
-- Should `/dashboard` remain as a route (e.g. redirecting to `/`), or be
-  removed outright once Phase 2 lands? Leaving a placeholder note here until
-  decided.
+- Which payment provider for Phase 7 (Paystack vs Flutterwave)?
+- Should the catalog move to Firestore before Phase 7 filters (colour, size,
+  brand, gender need data the static array doesn't have)?
+- Product images are hotlinked from Unsplash; host them (Firebase Storage is
+  already allow-listed in `next.config.ts`) before launch.
